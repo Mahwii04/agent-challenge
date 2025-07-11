@@ -1,9 +1,10 @@
 import { Agent } from "@mastra/core/agent";
 import { model } from "../../config";
-import { yourTool } from "../your-agent/your-tool";
+import { checkRssTool } from "./tools/check-rss";
+import { generateCaptionsTool } from "./tools/generate-captions";
 
 // Define Agent Name
-const name = "Your Agent";
+const name = "ShadowPoster Agent";
 
 // Define instructions for the agent
 // TODO: Add link here for recommendations on how to properly define instructions for an agent.
@@ -21,9 +22,9 @@ const instructions = `
       Use the yourTool to fetch current weather data.
 `;
 
-export const yourAgent = new Agent({
+export const shadowAgent = new Agent({
 	name,
 	instructions,
 	model,
-	tools: { yourTool },
+	tools: { checkRssTool, generateCaptionsTool }, 
 });
