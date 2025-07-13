@@ -5,9 +5,9 @@ import { createOllama } from "ollama-ai-provider";
 dotenv.config();
 
 // Export all your environment variables
-// Defaults to Ollama qwen2.5:1.5b
-// https://ollama.com/library/qwen2.5
-export const modelName = process.env.MODEL_NAME_AT_ENDPOINT ?? "qwen2.5:1.5b";
+// Defaults to Ollama gemma3
+// https://ollama.com/library/gemma3
+export const modelName = process.env.MODEL_NAME_AT_ENDPOINT ?? "gemma3";
 export const baseURL = process.env.API_BASE_URL ?? "http://127.0.0.1:11434/api";
 
 // Create and export the model instance

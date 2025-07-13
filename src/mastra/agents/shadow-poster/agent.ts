@@ -1,30 +1,47 @@
 import { Agent } from "@mastra/core/agent";
 import { model } from "../../config";
-import { checkRssTool } from "./tools/check-rss";
-import { generateCaptionsTool } from "./tools/generate-captions";
+import { rssTool } from "./tools/rssTool";
+import { generateCaptionsTool } from "./tools/captionGeneratorTool";
 
-// Define Agent Name
+// Agent Name
 const name = "ShadowPoster Agent";
 
-// Define instructions for the agent
+// Instructions for the agent
 // TODO: Add link here for recommendations on how to properly define instructions for an agent.
 // TODO: Remove comments (// ...) from `instructions`
 const instructions = `
-      // Define the character of the agent.
-      You are a helpful assistant that provides accurate information.
+      You are a social media copy expert. When given a blog post title and content, respond with highly engaging captions optimized for each of the following platforms:
 
-      // Define how the agent should behave here.
-      Your primary function is to help users get accurate details for specific topics. When responding:
-      - If the location name isn’t in English, please translate it
-      - Keep responses concise but informative
+    Instagram:
+    - Short and emotionally engaging
+    - Include 1–2 relevant hashtags
+    - Avoid links
 
-      // Define function that the agent needs to call
-      Use the yourTool to fetch current weather data.
+    LinkedIn:
+    - Professional tone
+    - Include key insight or takeaway
+    - Encourage discussion
+
+    YouTube Shorts:
+    - Hook-heavy
+    - Use emojis and energy
+    - No more than 2 sentences
+
+    TikTok:
+    - Trend-aware and punchy
+    - Use a strong CTA
+
+    Format your response exactly as:
+
+    Instagram: ...
+    LinkedIn: ...
+    YouTube Shorts: ...
+    TikTok: ...
 `;
 
 export const shadowAgent = new Agent({
 	name,
 	instructions,
 	model,
-	tools: { checkRssTool, generateCaptionsTool }, 
+	tools: { rssTool, generateCaptionsTool }, 
 });

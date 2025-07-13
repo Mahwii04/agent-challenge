@@ -12,5 +12,5 @@
   },
   "include": [
     "src/**/*"
-  ]
+, "src/mastra/agents/shadow-poster/tools/test.ts"  ]
 }
