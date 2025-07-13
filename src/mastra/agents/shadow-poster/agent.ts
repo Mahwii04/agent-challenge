@@ -1,14 +1,13 @@
 import { Agent } from "@mastra/core/agent";
 import { model } from "../../config";
 import { rssTool } from "./tools/rssTool";
-import { generateCaptionsTool } from "./tools/captionGeneratorTool";
+import { captionGeneratorTool } from "./tools/captionGeneratorTool";
+import { postToMeta } from "./tools/postToMeta";
 
 // Agent Name
 const name = "ShadowPoster Agent";
 
 // Instructions for the agent
-// TODO: Add link here for recommendations on how to properly define instructions for an agent.
-// TODO: Remove comments (// ...) from `instructions`
 const instructions = `
       You are a social media copy expert. When given a blog post title and content, respond with highly engaging captions optimized for each of the following platforms:
 
@@ -43,5 +42,5 @@ export const shadowAgent = new Agent({
 	name,
 	instructions,
 	model,
-	tools: { rssTool, generateCaptionsTool }, 
+	tools: { rssTool, captionGeneratorTool, postToMeta }, 
 });

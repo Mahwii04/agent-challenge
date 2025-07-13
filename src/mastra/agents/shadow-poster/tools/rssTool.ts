@@ -15,6 +15,7 @@ export const rssTool = createTool({
     link: z.string().url(),
     content: z.string(),
     pubDate: z.string(),
+    imageUrl: z.string().optional(), // ✅ New
   }),
   execute: async ({ context }) => {
     const feed = await parser.parseURL(context.feedUrl);
@@ -24,12 +25,21 @@ export const rssTool = createTool({
     }
 
     const latest = feed.items[0];
+    // Extract image URL from enclosure or media:content
+    const enclosure = latest.enclosure as any;
+
+    const imageUrl =
+      enclosure?.url ||
+      enclosure?.link ||
+      (latest as any)["media:content"]?.url ||
+      "";
 
     return {
       title: latest.title ?? "Untitled",
       link: latest.link ?? "",
       content: latest.contentSnippet ?? "",
       pubDate: latest.pubDate ?? new Date().toISOString(),
+      imageUrl,
     };
   },
 });
