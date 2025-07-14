@@ -190,7 +190,7 @@ Note: You'll need an account on [Dockerhub](https://hub.docker.com/)
 ```sh
 
 # Build and tag
-docker build -t yourusername/agent-challenge:latest .
+docker build -t mahwii04/agent-challenge:latest .
 
 # Run the container locally
 docker run -p 8080:8080 yourusername/agent-challenge:latest
