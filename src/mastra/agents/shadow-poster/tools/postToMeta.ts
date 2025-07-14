@@ -1,6 +1,8 @@
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 import fetch from "node-fetch";
+import "../../../config";
+import { createRuntimeContext } from "../runtime";
 
 // -------------------- TYPES --------------------
 
@@ -31,9 +33,6 @@ export const postToMeta = createTool({
   id: "post-to-meta",
   description: "Post content to Facebook Page and Instagram account via Meta Graph API",
   inputSchema: z.object({
-    fbPageId: z.string().describe("The Facebook Page ID"),
-    igUserId: z.string().describe("The Instagram User ID connected to the page"),
-    accessToken: z.string().describe("Long-lived Page Access Token"),
     captions: z.object({
       facebook: z.string(),
       instagram: z.string(),
@@ -46,13 +45,20 @@ export const postToMeta = createTool({
     igPostId: z.string().optional(),
   }),
   execute: async ({ context }) => {
-    const { fbPageId, igUserId, accessToken, captions, imageUrl } = context;
+    const fbPageId = createRuntimeContext().get("fbPageId") as string;
+    const igUserId = createRuntimeContext().get("igUserId") as string;
+    const accessToken = createRuntimeContext().get("accessToken") as string;
+    const { captions, imageUrl } = context;
 
-    // ✅ 1. Post TEXT ONLY to Facebook (via /feed)
+    // Create FB container
+    if (!imageUrl) {
+      throw new Error("❌ Facebook post requires an image URL.")
+    }
     const fbResponse = await fetch(`https://graph.facebook.com/v20.0/${fbPageId}/feed`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        image_url: imageUrl,
         message: captions.facebook,
         access_token: accessToken,
       }),
@@ -64,7 +70,7 @@ export const postToMeta = createTool({
       throw new Error(`❌ Facebook Post Error: ${JSON.stringify(fbData)}`);
     }
 
-    // ✅ 2. Create IG container (requires image)
+    // Create IG container
     if (!imageUrl) {
       throw new Error("❌ Instagram post requires an image URL.");
     }
@@ -85,7 +91,7 @@ export const postToMeta = createTool({
       throw new Error(`❌ Instagram Container Error: ${JSON.stringify(igContainerData)}`);
     }
 
-    // ✅ 3. Publish IG post
+    // Publish IG post
     const igPublishRes = await fetch(`https://graph.facebook.com/v20.0/${igUserId}/media_publish`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

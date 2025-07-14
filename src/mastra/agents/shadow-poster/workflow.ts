@@ -1,13 +1,8 @@
 import { createStep, createWorkflow } from "@mastra/core/workflows";
-import { RuntimeContext } from "@mastra/core/runtime-context";
 import { z } from "zod";
 import { shadowAgent } from "./agent";
-
-// Proper RuntimeContext implementation
-const createRuntimeContext = (): RuntimeContext => {
-  // Create a proper RuntimeContext instance
-  return new RuntimeContext();
-};
+import { createRuntimeContext } from "./runtime";
+import "../../config";
 
 // Define schemas
 const rssPostSchema = z.object({
@@ -29,40 +24,29 @@ const socialPostResultSchema = z.object({
   igPostId: z.string().optional(),
 });
 
-// Step 1: Fetch latest blog post
+// Step 1: Fetch latest post from RSS feed
 const fetchLatestPost = createStep({
   id: "fetch-latest-post",
   description: "Fetches the latest blog post from RSS feed",
   inputSchema: z.object({
     feedUrl: z.string().url(),
-    fbPageId: z.string(),
-    igUserId: z.string(),
-    accessToken: z.string(),
   }),
   outputSchema: rssPostSchema,
   execute: async ({ inputData }) => {
-    const result = await shadowAgent.tools.rssTool.execute({
-      context: { feedUrl: inputData.feedUrl },
-      runtimeContext: createRuntimeContext()
+    return await shadowAgent.tools.rssTool.execute({
+      context: {
+        feedUrl: inputData.feedUrl,
+      },
+      runtimeContext: createRuntimeContext(),
     });
-    return {
-      ...result,
-      fbPageId: inputData.fbPageId,
-      igUserId: inputData.igUserId,
-      accessToken: inputData.accessToken,
-    };
   },
 });
 
-// Step 2: Generate captions
+// Step 2: Generate captions from post
 const generateCaptions = createStep({
   id: "generate-captions",
   description: "Creates platform-optimized social media captions",
-  inputSchema: rssPostSchema.extend({
-    fbPageId: z.string(),
-    igUserId: z.string(),
-    accessToken: z.string(),
-  }),
+  inputSchema: rssPostSchema,
   outputSchema: captionsSchema,
   execute: async ({ inputData }) => {
     return await shadowAgent.tools.captionGeneratorTool.execute({
@@ -71,35 +55,29 @@ const generateCaptions = createStep({
         content: inputData.content,
         link: inputData.link,
       },
-      runtimeContext: createRuntimeContext()
+      runtimeContext: createRuntimeContext(),
     });
   },
 });
 
-// Step 3: Post to social
+// Step 3: Post to Meta
 const postToSocial = createStep({
   id: "post-to-social",
   description: "Publishes content to Facebook and Instagram",
   inputSchema: captionsSchema.extend({
-    fbPageId: z.string(),
-    igUserId: z.string(),
-    accessToken: z.string(),
     imageUrl: z.string().optional(),
   }),
   outputSchema: socialPostResultSchema,
   execute: async ({ inputData }) => {
     return await shadowAgent.tools.postToMeta.execute({
       context: {
-        fbPageId: inputData.fbPageId,
-        igUserId: inputData.igUserId,
-        accessToken: inputData.accessToken,
         captions: {
           facebook: inputData.facebook,
           instagram: inputData.instagram,
         },
         imageUrl: inputData.imageUrl,
       },
-      runtimeContext: createRuntimeContext()
+      runtimeContext: createRuntimeContext(),
     });
   },
 });
@@ -109,9 +87,6 @@ const shadowPosterWorkflow = createWorkflow({
   id: "shadow-poster-workflow",
   inputSchema: z.object({
     feedUrl: z.string().url(),
-    fbPageId: z.string(),
-    igUserId: z.string(),
-    accessToken: z.string(),
   }),
   outputSchema: socialPostResultSchema,
 })

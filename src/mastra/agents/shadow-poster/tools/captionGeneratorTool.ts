@@ -1,6 +1,6 @@
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
-import { model } from "../../../config"; // ✅ Use your actual model instance
+import { model } from "../../../config";
 
 export const captionGeneratorTool = createTool({
   id: "generate-social-captions",
